@@ -1,4 +1,4 @@
-![](https://travis-ci.com/grisu-io/pojo.svg?branch=master)
+![](https://travis-ci.com/grisu-io/ee-core.svg?branch=master)
 
 # Pojo
 
