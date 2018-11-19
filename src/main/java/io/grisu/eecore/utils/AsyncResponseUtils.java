@@ -2,10 +2,13 @@ package io.grisu.eecore.utils;
 
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,6 +16,8 @@ import io.grisu.core.exceptions.GrisuException;
 import io.grisu.core.utils.ExceptionUtils;
 
 public class AsyncResponseUtils {
+
+    private static final Logger logger = Logger.getLogger(AsyncResponseUtils.class.getName());
 
     private static final Response.Status DEFAULT_NO_RESULT_STATUS = Response.Status.NOT_FOUND;
 
@@ -76,7 +81,7 @@ public class AsyncResponseUtils {
         };
     }
 
-    private static <T> BiConsumer<T, Throwable> created(AsyncResponse response, Function<T, String> t) {
+    public static <T> BiConsumer<T, Throwable> created(AsyncResponse response, Function<T, String> t) {
         return (result, ex) -> {
             if (ex != null) {
                 response.resume(handleException(ex));
@@ -111,7 +116,9 @@ public class AsyncResponseUtils {
             return Response.status(((GrisuException) rootException).getErrorCode())
                 .entity(grisuException.getErrors()).build();
         } else {
-            rootException.printStackTrace();
+            StringWriter sw = new StringWriter();
+            rootException.printStackTrace(new PrintWriter(sw));
+            logger.warning(sw.toString());
             return Response.serverError().entity(rootException).build();
         }
     }
