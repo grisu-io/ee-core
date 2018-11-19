@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.grisu.core.exceptions.GrisuException;
 import io.grisu.core.utils.ExceptionUtils;
 
 public class AsyncResponseUtils {
@@ -53,51 +54,66 @@ public class AsyncResponseUtils {
 
     private static <T, U, E> BiConsumer<T, Throwable> handle(AsyncResponse response, Function<T, U> resultTransformer, Supplier<E> alternativeResultSupplier) {
         return (result, ex) -> {
-            if (ex == null) {
-                if (result != null) {
-                    try {
-                        response.resume(resultTransformer.apply(result));
-                    } catch (Exception e) {
-                        response.resume(e);
-                    }
-                } else {
-                    E alternative = alternativeResultSupplier.get();
-                    if (alternative instanceof Throwable) {
-                        response.resume((Throwable) alternative);
-                    } else {
-                        response.resume(alternative);
-                    }
+            if (ex != null) {
+                response.resume(handleException(ex));
+                return;
+            }
+
+            if (result != null) {
+                try {
+                    response.resume(resultTransformer.apply(result));
+                } catch (Exception e) {
+                    response.resume(e);
                 }
             } else {
-                response.resume(ExceptionUtils.findRootException(ex));
+                E alternative = alternativeResultSupplier.get();
+                if (alternative instanceof Throwable) {
+                    response.resume((Throwable) alternative);
+                } else {
+                    response.resume(alternative);
+                }
             }
         };
     }
 
-    public static <T> BiConsumer<T, Throwable> created(AsyncResponse response, Function<T, String> t) {
+    private static <T> BiConsumer<T, Throwable> created(AsyncResponse response, Function<T, String> t) {
         return (result, ex) -> {
-            if (ex == null) {
-                try {
-                    Response.status(Response.Status.CREATED)
-                        .location(new URI(t.apply(result)))
-                        .entity(response).build();
-                } catch (Exception e) {
-                    response.resume(ExceptionUtils.findRootException(e));
-                }
-            } else {
-                response.resume(ExceptionUtils.findRootException(ex));
+            if (ex != null) {
+                response.resume(handleException(ex));
+                return;
+            }
+
+            try {
+                response.resume(Response.status(Response.Status.CREATED)
+                    .location(new URI(t.apply(result)))
+                    .entity(response).build());
+            } catch (Exception e) {
+                response.resume(handleException(e));
             }
         };
     }
 
     public static <T> BiConsumer<T, Throwable> justOutput(AsyncResponse response, Object output) {
         return (result, ex) -> {
-            if (ex == null) {
-                response.resume(output);
-            } else {
-                response.resume(ExceptionUtils.findRootException(ex));
+            if (ex != null) {
+                response.resume(handleException(ex));
+                return;
             }
+
+            response.resume(output);
         };
+    }
+
+    private static Response handleException(Throwable t) {
+        final Throwable rootException = ExceptionUtils.findRootException(t);
+        if (rootException instanceof GrisuException) {
+            GrisuException grisuException = (GrisuException) rootException;
+            return Response.status(((GrisuException) rootException).getErrorCode())
+                .entity(grisuException.getErrors()).build();
+        } else {
+            rootException.printStackTrace();
+            return Response.serverError().entity(rootException).build();
+        }
     }
 
 }
