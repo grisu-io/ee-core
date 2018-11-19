@@ -91,7 +91,7 @@ public class AsyncResponseUtils {
             try {
                 response.resume(Response.status(Response.Status.CREATED)
                     .location(new URI(t.apply(result)))
-                    .entity(response).build());
+                    .entity(result).build());
             } catch (Exception e) {
                 response.resume(handleException(e));
             }
