@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import io.grisu.core.exceptions.GrisuException;
 import io.grisu.core.utils.ExceptionUtils;
+import io.grisu.core.utils.MapBuilder;
 
 public class AsyncResponseUtils {
 
@@ -119,7 +120,8 @@ public class AsyncResponseUtils {
             StringWriter sw = new StringWriter();
             rootException.printStackTrace(new PrintWriter(sw));
             logger.warning(sw.toString());
-            return Response.serverError().entity(rootException).build();
+            return Response.serverError().entity(MapBuilder
+                .instance().add("error", "Aliens have kidnapped the actual cause, I'm sorry!").build()).build();
         }
     }
 
