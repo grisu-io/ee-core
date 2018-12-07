@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.github.grisu-io</groupId>
       <artifactId>core</artifactId>
-      <version>7bfd3d24c7b6b1171f6a23a9967cf59140199266</version>
+      <version>2fde27ea51d9f4a7d64ef89a35698c1a88cc9556</version>
     </dependency>
     <dependency>
       <groupId>javax</groupId>
