@@ -58,7 +58,7 @@ public class AsyncResponseUtils {
         return justOutput(response, Response.ok().build());
     }
 
-    private static <T, U, E> BiConsumer<T, Throwable> handle(AsyncResponse response, Function<T, U> resultTransformer, Supplier<E> alternativeResultSupplier) {
+    public static <T, U, E> BiConsumer<T, Throwable> handle(AsyncResponse response, Function<T, U> resultTransformer, Supplier<E> alternativeResultSupplier) {
         return (result, ex) -> {
             if (ex != null) {
                 response.resume(handleException(ex));
@@ -110,7 +110,7 @@ public class AsyncResponseUtils {
         };
     }
 
-    private static Response handleException(Throwable t) {
+    public static Response handleException(Throwable t) {
         final Throwable rootException = ExceptionUtils.findRootException(t);
         if (rootException instanceof GrisuException) {
             GrisuException grisuException = (GrisuException) rootException;
