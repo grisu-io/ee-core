@@ -68,6 +68,11 @@ public class AsyncResponseUtils implements AsyncResponseIFace {
     }
 
     @Override
+    public <T> BiConsumer<T, Throwable> noContent(AsyncResponse response) {
+        return justOutput(response, Response.noContent().build());
+    }
+
+    @Override
     public <T, U, E> BiConsumer<T, Throwable> handle(AsyncResponse response, Function<T, U> resultTransformer, Supplier<E> alternativeResultSupplier) {
         return (result, ex) -> {
             if (ex != null) {

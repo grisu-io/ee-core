@@ -26,6 +26,8 @@ public interface AsyncResponseIFace {
 
     <T> BiConsumer<T, Throwable> justOk(javax.ws.rs.container.AsyncResponse response);
 
+    <T> BiConsumer<T, Throwable> noContent(javax.ws.rs.container.AsyncResponse response);
+
     <T, U, E> BiConsumer<T, Throwable> handle(javax.ws.rs.container.AsyncResponse response, Function<T, U> resultTransformer, Supplier<E> alternativeResultSupplier);
 
     <T> BiConsumer<T, Throwable> created(javax.ws.rs.container.AsyncResponse response, Function<T, String> t);
